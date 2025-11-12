@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -12,7 +13,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        return view('products.index', [
+            'products' => Product::all(),
+        ]);
     }
 
     /**
@@ -20,7 +23,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('products.create');
     }
 
     /**
@@ -28,7 +31,33 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'unique:products,slug,except,id', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:1024'],
+            'status' => ['required', 'in:1,2'],
+            'description' => ['required', 'string', 'max:500'],
+        ]);
+
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('products', 'public');
+            $validated['image_path'] = $path;
+        }
+
+        Product::create([
+            'name' => $validated['name'],
+            'slug' => Str::slug($validated['slug']),
+            'price' => $validated['price'],
+            'stock_quantity' => $validated['quantity'],
+            'image_url' => $validated['image_path'],
+            'status' => $validated['status'] ?? 0,
+            'description' => $validated['description'],
+        ]);
+
+        return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
     /**

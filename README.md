@@ -7,6 +7,7 @@
 - php artisan migrate
 - npm install
 - npm run dev
+- composer require stripe/stripe-php
 
 ----
 
