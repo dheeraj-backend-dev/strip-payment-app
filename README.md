@@ -12,6 +12,9 @@
 ----
 
 ```php
+    use Stripe\Checkout\Session;
+    use Stripe\Stripe;
+
     public function checkout(Request $request)
     {
         $request->validate([
